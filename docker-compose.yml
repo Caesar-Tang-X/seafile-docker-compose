@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mariadb:10.11
+    container_name: seafile-mariadb-10.11
+    environment:
+      - MYSQL_ROOT_PASSWORD=xiangwen123  
+    volumes:
+      - ./seafile/db/data:/var/lib/mysql  
+    networks:
+      - seafile-net
+
+  memcached:
+    image: memcached:1.6.18
+    container_name: seafile-memcached-1.6.18
+    entrypoint: memcached -m 256
+    networks:
+      - seafile-net
+          
+  seafile:
+    image: seafileltd/seafile-mc:11.0.9
+    container_name: seafile-mc-11.0.9
+    ports:
+      - "80:80"
+      - "443:443"  
+    volumes:
+      - ./seafile/app/data:/shared   
+    environment:
+      - TIME_ZONE=Asia/Shanghai 
+      - DB_HOST=db
+      - DB_ROOT_PASSWD=xiangwen123  
+      - SEAFILE_ADMIN_EMAIL=admin@3dbizhi.com 
+      - SEAFILE_ADMIN_PASSWORD=xiangwen123 
+    depends_on:
+      - db
+      - memcached
+    networks:
+      - seafile-net
+
+networks:
+  seafile-net:
+    driver: bridge
